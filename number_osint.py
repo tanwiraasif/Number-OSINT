@@ -3,7 +3,7 @@ import phonenumbers  # You can install this via pip install phonenumbers
 
 print("Phone Number OSINT Tool | Creator: tanwiraasif")
 
-API_KEY = "f3a0b01d0fe46******"  # Replace with your full key
+API_KEY = "f3a0b01d0fe46538a756543fa96f3a58"  # Replace with your full key
 BASE_URL = "http://apilayer.net/api/validate"
 
 def is_valid_phone_number(phone_number):
