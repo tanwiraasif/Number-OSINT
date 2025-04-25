@@ -14,7 +14,7 @@ print(r"""
 """)
 
 # Replace 'your_actual_api_key' with your Numverify API key
-API_KEY = "f3a0b01d0fe46538a756543fa96f3a58"  # Insert your Numverify API key here
+API_KEY = ""  # Insert your Numverify API key here
 BASE_URL = "https://apilayer.net/api/validate"
 
 def is_valid_phone_number(phone_number):
