@@ -1,62 +1,35 @@
-# number_osint.py
-# Creator: tanwiraasif
-
 import requests
-from bs4 import BeautifulSoup
 
-def get_number_details(phone_number):
-    try:
-        print("\n[+] Scanning phone number:", phone_number)
-        url = f"https://www.findandtrace.com/trace-mobile-number-location/?mobilenumber={phone_number}"
-        headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
-        response = requests.get(url, headers=headers)
-        soup = BeautifulSoup(response.text, "html.parser")
+print("Phone Number OSINT Tool | Creator: tanwiraasif")
 
-        details = {}
+API_KEY = "f3a0b01d0fe46538a756543fa96f3a58"  # Replace with your full key
+BASE_URL = "http://apilayer.net/api/validate"
 
-        fields = [
-            "Mobile Number", "SIM card", "Mobile State", "IMEI number",
-            "MAC address", "Connection", "IP address", "Owner Name",
-            "Location", "Hometown", "Reference City", "Language",
-            "Mobile Locations", "Country", "Tracking History",
-            "Tracker Id", "Tower Locations"
-        ]
+while True:
+    phone_number = input("Enter phone number with country code (or type 'exit' to quit): ")
+    if phone_number.lower() == "exit":
+        break
 
-        for field in fields:
-            cell = soup.find(string=field)
-            if cell:
-                value = cell.find_next("td").text.strip()
-            else:
-                value = "Not found"
-            details[field] = value
+    params = {
+        'access_key': API_KEY,
+        'number': phone_number,
+        'country_code': '',
+        'format': 1
+    }
 
-        return details
+    print("\n[+] Scanning phone number:", phone_number)
+    response = requests.get(BASE_URL, params=params)
 
-    except Exception as e:
-        print("[!] Error:", e)
-        return None
-
-def display_details(details):
-    print("\n======== Phone Number OSINT Result ========")
-    for key, value in details.items():
-        print(f"{key}: {value}")
-    print("===========================================\n")
-
-if __name__ == "__main__":
-    print("Phone Number OSINT Tool | Creator: tanwiraasif")
-
-    while True:
-        number = input("Enter a phone number (or type 'exit' to quit): ")
-        if number.lower() == "exit":
-            break
-        if not number.isdigit():
-            print("[!] Please enter a valid number.")
-            continue
-
-        info = get_number_details(number)
-        if info:
-            display_details(info)
-        else:
-            print("[!] Failed to fetch details.")
+    if response.status_code == 200:
+        data = response.json()
+        print("======= Phone Number OSINT Result =======")
+        print("Valid         :", data.get("valid"))
+        print("Number        :", data.get("international_format"))
+        print("Local Format  :", data.get("local_format"))
+        print("Country       :", data.get("country_name"))
+        print("Location      :", data.get("location"))
+        print("Carrier       :", data.get("carrier"))
+        print("Line Type     :", data.get("line_type"))
+        print("========================================\n")
+    else:
+        print("Error: Could not retrieve data.")
