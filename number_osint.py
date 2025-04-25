@@ -1,17 +1,21 @@
 import requests
 import phonenumbers
-import os
-from dotenv import load_dotenv
 
-print("Phone Number OSINT Tool | Creator: tanwiraasif")
+# Cool ASCII art for the title
+print(r"""
+=======================================================================
+   ____  _   _  ____  _   _  _____  _____  _____  ____  ____  _____
+  /  _ \/  / \/  _ \/  / \/  __/ /  __/ /  __/ /  _ \/  _ \/  __/
+  | / \||  / || / \||  / ||  \  |  \  |  \  | / \|| / \||  \/|
+  | \_/||  \_/| \_/||  \_/|  /_ |  /_ |  /_ | \_/|| \_/||    / 
+  \____/\____/\____/\____/\____\\____\\____\\____/\____/|_|_\|
+  NUMBER OSINT - Created by TANWIR AASIF
+=======================================================================
+""")
 
-# Load API key from environment variable
-load_dotenv()
-API_KEY = os.getenv("NUMVERIFY_API_KEY")
-if not API_KEY:
-    raise ValueError("API key not found. Set NUMVERIFY_API_KEY in .env file.")
-
-BASE_URL = "https://apilayer.net/api/validate"  # Use HTTPS explicitly
+# Replace 'your_actual_api_key' with your Numverify API key
+API_KEY = "f3a0b01d0fe46538a756543fa96f3a58"  # Insert your Numverify API key here
+BASE_URL = "https://apilayer.net/api/validate"
 
 def is_valid_phone_number(phone_number):
     try:
@@ -47,7 +51,7 @@ def display_phone_info(data):
         return
 
     if data.get("valid", False):
-        print("======= Phone Number OSINT Result =======")
+        print("======= PHONE OSINT RESULTS =======")
         print(f"Valid         : {data.get('valid', 'N/A')}")
         print(f"Number        : {data.get('international_format', 'N/A')}")
         print(f"Local Format  : {data.get('local_format', 'N/A')}")
@@ -55,7 +59,7 @@ def display_phone_info(data):
         print(f"Location      : {data.get('location', 'N/A')}")
         print(f"Carrier       : {data.get('carrier', 'N/A')}")
         print(f"Line Type     : {data.get('line_type', 'N/A')}")
-        print("========================================\n")
+        print("==================================\n")
     else:
         print("Error: Invalid phone number according to the API response.")
 
@@ -63,18 +67,18 @@ def main():
     while True:
         phone_number = input("Enter phone number with country code (or type 'exit' to quit): ").strip()
         if phone_number.lower() in ("exit", "quit", "q"):
-            print("Exiting...")
+            print("Exiting... Stay stealthy! 👾")
             break
 
         if len(phone_number) > 50:  # Basic input length check
-            print("Error: Phone number is too long. Please try again.")
+            print("Error: Phone number is too long. Keep it legit!")
             continue
 
         if not is_valid_phone_number(phone_number):
-            print("Error: Invalid phone number format. Please try again.")
+            print("Error: Invalid phone number format. Try again, hacker!")
             continue
 
-        print("\n[+] Scanning phone number:", phone_number)
+        print("\n[+] Scanning phone number like a pro:", phone_number)
         data = get_phone_info(phone_number)
         display_phone_info(data)
 
