@@ -1,10 +1,17 @@
 import requests
-import phonenumbers  # You can install this via pip install phonenumbers
+import phonenumbers
+import os
+from dotenv import load_dotenv
 
 print("Phone Number OSINT Tool | Creator: tanwiraasif")
 
-API_KEY = "f3a0b01d0fe46538a756543fa96f3a58"  # Replace with your full key
-BASE_URL = "http://apilayer.net/api/validate"
+# Load API key from environment variable
+load_dotenv()
+API_KEY = os.getenv("NUMVERIFY_API_KEY")
+if not API_KEY:
+    raise ValueError("API key not found. Set NUMVERIFY_API_KEY in .env file.")
+
+BASE_URL = "https://apilayer.net/api/validate"  # Use HTTPS explicitly
 
 def is_valid_phone_number(phone_number):
     try:
@@ -13,46 +20,63 @@ def is_valid_phone_number(phone_number):
     except phonenumbers.phonenumberutil.NumberParseException:
         return False
 
-while True:
-    phone_number = input("Enter phone number with country code (or type 'exit' to quit): ")
-    if phone_number.lower() == "exit":
-        break
-
-    # Check if the phone number is valid
-    if not is_valid_phone_number(phone_number):
-        print("Error: Invalid phone number format. Please try again.")
-        continue
-
-    # Automatically detect country code if not provided
+def get_phone_info(phone_number):
     try:
         parsed_number = phonenumbers.parse(phone_number)
-        country_code = phonenumbers.region_code_for_number(parsed_number)
+        country_code = phonenumbers.region_code_for_number(parsed_number) or ""
     except phonenumbers.phonenumberutil.NumberParseException:
-        country_code = ''  # Empty if country code is not detected
+        country_code = ""
 
     params = {
-        'access_key': API_KEY,
-        'number': phone_number,
-        'country_code': country_code,
-        'format': 1
+        "access_key": API_KEY,
+        "number": phone_number,
+        "country_code": country_code,
+        "format": 1,
     }
 
-    print("\n[+] Scanning phone number:", phone_number)
-    response = requests.get(BASE_URL, params=params)
+    try:
+        response = requests.get(BASE_URL, params=params, timeout=10)
+        response.raise_for_status()  # Raise exception for non-200 status codes
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error: Failed to retrieve data from API: {e}")
+        return None
 
-    if response.status_code == 200:
-        data = response.json()
-        if data.get("valid") == "true":
-            print("======= Phone Number OSINT Result =======")
-            print(f"Valid         : {data.get('valid')}")
-            print(f"Number        : {data.get('international_format')}")
-            print(f"Local Format  : {data.get('local_format')}")
-            print(f"Country       : {data.get('country_name')}")
-            print(f"Location      : {data.get('location')}")
-            print(f"Carrier       : {data.get('carrier')}")
-            print(f"Line Type     : {data.get('line_type')}")
-            print("========================================\n")
-        else:
-            print("Error: Invalid phone number according to the API response.")
+def display_phone_info(data):
+    if not data:
+        return
+
+    if data.get("valid", False):
+        print("======= Phone Number OSINT Result =======")
+        print(f"Valid         : {data.get('valid', 'N/A')}")
+        print(f"Number        : {data.get('international_format', 'N/A')}")
+        print(f"Local Format  : {data.get('local_format', 'N/A')}")
+        print(f"Country       : {data.get('country_name', 'N/A')}")
+        print(f"Location      : {data.get('location', 'N/A')}")
+        print(f"Carrier       : {data.get('carrier', 'N/A')}")
+        print(f"Line Type     : {data.get('line_type', 'N/A')}")
+        print("========================================\n")
     else:
-        print("Error: Could not retrieve data. API returned status code", response.status_code)
+        print("Error: Invalid phone number according to the API response.")
+
+def main():
+    while True:
+        phone_number = input("Enter phone number with country code (or type 'exit' to quit): ").strip()
+        if phone_number.lower() in ("exit", "quit", "q"):
+            print("Exiting...")
+            break
+
+        if len(phone_number) > 50:  # Basic input length check
+            print("Error: Phone number is too long. Please try again.")
+            continue
+
+        if not is_valid_phone_number(phone_number):
+            print("Error: Invalid phone number format. Please try again.")
+            continue
+
+        print("\n[+] Scanning phone number:", phone_number)
+        data = get_phone_info(phone_number)
+        display_phone_info(data)
+
+if __name__ == "__main__":
+    main()
